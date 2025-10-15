@@ -1,0 +1,49 @@
+# Download gnomad.v2.1.1.lof_metrics.by_gene.txt.bgz
+wget wget https://storage.googleapis.com/gcp-public-data--gnomad/release/2.1.1/constraint/gnomad.v2.1.1.lof_metrics.by_gene.txt.bgz
+
+# unzip
+bgzip -d gnomad.v2.1.1.lof_metrics.by_gene.txt.bgz
+
+
+# Update InterVar PVS1.LOF.genes.hg19 with gnomAD v2.1.1 constraint data
+# Following VarSome methodology: pLI >= 0.9 OR oe_lof < 0.755
+# Extract loss-of-function constrained genes from gnomAD v2.1.1 data
+# Column 21 = pLI (probability of LoF intolerance, threshold >= 0.9)
+# Column 24 = oe_lof (observed/expected ratio, VarSome threshold < 0.755)
+cat gnomad.v2.1.1.lof_metrics.by_gene.txt | awk -F'\t' 'NR>1 && ($21 >= 0.9 || $24 < 0.755) {print $1}' > lof_constrained_genes.txt
+
+# Combine original InterVar genes with new gnomAD constraint-based genes
+# Sort alphabetically and remove duplicates to create updated gene list
+cat PVS1.LOF.genes.hg19 lof_constrained_genes.txt | sort | uniq > PVS1.LOF.genes.hg19.updated
+
+# Replace original InterVar PVS1 gene file with updated version
+# Backup recommended before running: cp PVS1.LOF.genes.hg19 PVS1.LOF.genes.hg19.backup
+mv PVS1.LOF.genes.hg19.updated PVS1.LOF.genes.hg19
+
+# Verification commands:
+# wc -l PVS1.LOF.genes.hg19  # Check final gene count
+# grep "FAT3" PVS1.LOF.genes.hg19  # Verify specific gene inclusion
+
+
+
+
+#!!!!!!!!!!!!!!!!!!!!!!!#######################
+# CORRECTION
+#!!!!!!!!!!!!!!!!!!!!!!!#######################
+
+
+
+
+# Follow only  LOF Observed/Expected is less than 0.7555 and exclude pLI >= 0.9
+awk -F'\t' 'NR>1 && $24 != "." && $24 < 0.7555 {print $1}' gnomad.v2.1.1.lof_metrics.by_gene.txt > lof_constrained_genes.txt
+
+# Combine original InterVar genes with new gnomAD constraint-based genes
+# Sort alphabetically and remove duplicates to create updated gene list
+cat PVS1.LOF.genes.hg19 lof_constrained_genes.txt | sort | uniq > PVS1.LOF.genes.hg19.updated
+
+# Replace original InterVar PVS1 gene file with updated version
+# Backup recommended before running: cp PVS1.LOF.genes.hg19 PVS1.LOF.genes.hg19.backup
+mv PVS1.LOF.genes.hg19.updated PVS1.LOF.genes.hg19
+
+
+
