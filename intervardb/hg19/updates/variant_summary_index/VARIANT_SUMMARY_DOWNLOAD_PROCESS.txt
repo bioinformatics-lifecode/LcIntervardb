@@ -1,0 +1,5 @@
+
+wget https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/variant_summary.txt.gz
+
+python build_clinvar_index.py variant_summary.txt.gz clinvar_lof_index.pkl
+
